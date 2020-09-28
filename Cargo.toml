@@ -1,8 +1,14 @@
 [package]
 name = "distiller"
+description = "distiller is a command line tool written in rust, used for extracting comment from source code and storing the results into a queryable sqlite database."
 version = "1.0.0"
 authors = ["Alexis Lowe <alexis.lowe@protonmail.com>"]
 edition = "2018"
+repository = "https://gitlab.com/chimbosonic/distiller/"
+license = "MIT"
+readme = "README.md"
+keywords = ["comment", "sqlite"]
+categories = ["command-line-utilities"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
