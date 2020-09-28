@@ -1,0 +1,31 @@
+[package]
+name = "distiller"
+version = "1.0.0"
+authors = ["Alexis Lowe <alexis.lowe@protonmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+comment-parser = "*"
+walkdir = "*"
+serde_json = "*"
+serde_rusqlite = "*"
+serde = { version = "*", features = ["derive"] }
+sha3 = "*" 
+uuid = { version = "*", features = ["v4", "serde"] }
+rusqlite = { version = "*", features = ["bundled"] }
+log = "*"
+env_logger = "*"
+clap = "*"
+
+[profile.release]
+opt-level = 3
+debug = false
+debug-assertions = false
+overflow-checks = false
+lto = true
+panic = 'unwind'
+incremental = false
+codegen-units = 16
+rpath = false
