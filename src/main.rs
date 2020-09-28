@@ -39,22 +39,22 @@ struct FileData {
 
 fn main() {
 	let matches = App::new("distiller")
-                          .version("1.0.0")
-                          .about("Extracts all comments in source code to sqlite db")
-                          .arg(Arg::with_name("output")
-                               .short("o")
-                               .long("output")
-                               .value_name("FILE")
-                               .help("Sets the output db file defaults to results.db")
-                               .takes_value(true))
-													.arg(Arg::with_name("INPUT")
-															.short("i")
-															.long("input")
-															.help("Sets the source directory to parse")
-															.value_name("DIRECTORY")
-															.required(true)
-															.takes_value(true))
-                         	.get_matches();
+		.version("1.0.0")
+		.about("Extracts all comments in source code to sqlite db")
+		.arg(Arg::with_name("output")
+			.short("o")
+			.long("output")
+			.value_name("FILE")
+			.help("Sets the output db file defaults to results.db")
+			.takes_value(true))
+		.arg(Arg::with_name("INPUT")
+			.short("i")
+			.long("input")
+			.help("Sets the source directory to parse")
+			.value_name("DIRECTORY")
+			.required(true)
+			.takes_value(true))
+		.get_matches();
 	let dbpath = matches.value_of("output").unwrap_or("results.db");
 	let scandir = matches.value_of("INPUT").unwrap();
 	
