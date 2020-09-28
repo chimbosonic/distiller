@@ -6,7 +6,7 @@ authors = ["Alexis Lowe <alexis.lowe@protonmail.com>"]
 edition = "2018"
 repository = "https://gitlab.com/chimbosonic/distiller/"
 license = "MIT"
-readme = "README.md"
+readme = "README.MD"
 keywords = ["comment", "sqlite"]
 categories = ["command-line-utilities"]
 
