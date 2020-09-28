@@ -13,17 +13,17 @@ categories = ["command-line-utilities"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-comment-parser = "*"
-walkdir = "*"
-serde_json = "*"
-serde_rusqlite = "*"
-serde = { version = "*", features = ["derive"] }
-sha3 = "*" 
-uuid = { version = "*", features = ["v4", "serde"] }
-rusqlite = { version = "*", features = ["bundled"] }
-log = "*"
-env_logger = "*"
-clap = "*"
+comment-parser = "0.1.0"
+walkdir = "2.3.1"
+serde_json = "1.0.57"
+serde_rusqlite = "0.26.0"
+serde = { version = "1.0.116", features = ["derive"] }
+sha3 = "0.9.1"
+uuid = { version = "0.8.1", features = ["v4", "serde"] }
+rusqlite = { version = "0.24.0", features = ["bundled"] }
+log = "0.4.11"
+env_logger = "0.7.1"
+clap = "2.33.3"
 
 [profile.release]
 opt-level = 3
