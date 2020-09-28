@@ -1,5 +1,5 @@
 # Distiller
-
+![crates.io](https://img.shields.io/crates/v/distiller.svg)
 `distiller` is a command line tool written in rust, used for extracting comment from source code and storing the results into a queryable sqlite database.
 
 ## Installation
