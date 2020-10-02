@@ -15,15 +15,16 @@ categories = ["command-line-utilities"]
 [dependencies]
 comment-parser = "0.1.0"
 walkdir = "2.3.1"
-serde_json = "1.0.57"
 serde_rusqlite = "0.26.0"
 serde = { version = "1.0.116", features = ["derive"] }
 sha3 = "0.9.1"
-uuid = { version = "0.8.1", features = ["v4", "serde"] }
 rusqlite = { version = "0.24.0", features = ["bundled"] }
 log = "0.4.11"
 env_logger = "0.7.1"
 clap = "2.33.3"
+futures = "0.3.5"
+num_cpus = "1.13.0"
+threadpool = "1.8.1"
 
 [profile.release]
 opt-level = 3

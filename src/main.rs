@@ -2,38 +2,37 @@ extern crate walkdir;
 extern crate serde;
 extern crate comment_parser;
 extern crate sha3;
-extern crate uuid;
 extern crate serde_rusqlite;
 extern crate rusqlite;
 extern crate env_logger;
-extern crate serde_json;
 extern crate clap;
+extern crate num_cpus;
+extern crate threadpool;
 
 use clap::{Arg, App};
 use walkdir::WalkDir;
-use std::path::Path;
+use std::path::{Path,PathBuf};
 use comment_parser::CommentParser;
 use std::fs;
 use std::ffi::OsStr;
 use sha3::{Sha3_512, Digest};
 use serde::{Deserialize, Serialize};
 use serde_rusqlite::*;
-use uuid::Uuid;
-use rusqlite::{NO_PARAMS , params, Connection};
-
+use rusqlite::{NO_PARAMS , params, Connection, Transaction};
+use threadpool::ThreadPool;
+use std::sync::mpsc::channel;
 
 #[derive(Serialize, Deserialize)]
 struct Comment {
 	comment: String, // String containing the comment
-	uuid: Uuid, // uuid for the comment
-	fileid: Uuid,// uuid of the file where the comment was found
+	hash: String, // Hash for the comment
+	filehash: String,// Hash of the file where the comment was found
 }
 
 #[derive(Serialize, Deserialize)]
 struct FileData {
 	path: String, // Path of the file
 	hash: String, // Sha3_512 hash of the file
-	uuid: Uuid, // uuid for the file
 	comments: Vec<Comment>, // Vector of Comments
 }
 
@@ -62,33 +61,84 @@ fn main() {
 	fs::remove_file(&dbpath).ok(); //Remove any existing results database
 	let connection = rusqlite::Connection::open(&dbpath).unwrap();
 	create_table(&connection);
-	search_source(scandir.to_string(), connection);
+	connection.close().unwrap();
+	search_source(scandir.to_string(), dbpath.to_string());
+	println!("Done");
 }
+
+/*
+	Reads a file and returns a FileContents struct containing:
+		- contents: String containing all file contents but replacing non UTF8 chars
+		- hash: Hash of the file
+*/
+fn read_file(filepath: &Path) -> Result<(String, String)> {
+	log::info!("Reading {}",filepath.display().to_string());
+
+	let buf = fs::read(filepath).unwrap();
+	let contents = String::from_utf8_lossy(&buf).into_owned().to_string();
+	let mut hasher = Sha3_512::new();
+	hasher.update(&buf);
+	let hash = hasher.finalize();
+
+	Ok((contents.to_owned(), format!("{:x}", hash).to_owned()))
+}
+
 
 /*
 	For a given path and sqlite connection
 	This will walk the given path and then look for comments in every file with an extension of (.c,.cpp,.cxx,.h,.rs).
 	Comments are then store in the sqlite db
 */
-fn search_source(path: String, connection: Connection){
+fn search_source(path: String, dbpath: String) {
 	log::info!("Searching {} for comments",path);
+
+	let pool = ThreadPool::new(num_cpus::get());
+	let (tx, rx) = channel();
 
 	for e in WalkDir::new(path).into_iter().filter_map(|e| e.ok()) {
 		let metadata = e.metadata().unwrap();
 		let path = e.path();
 		if metadata.is_file() {
-			let extension = path.extension();
 
-			if Some(OsStr::new("c")) == extension || Some(OsStr::new("cpp")) == extension || Some(OsStr::new("cxx")) == extension || Some(OsStr::new("h")) == extension {
-				let filedata = get_comments(&path);
-				if !filedata.comments.is_empty(){
-					// write_filedata(&filedata);
-					add_filedata_sql(&filedata,&connection);
-				}
+			let extension = path.extension();
+			
+			if Some(OsStr::new("c")) == extension || Some(OsStr::new("cpp")) == extension || Some(OsStr::new("cxx")) == extension || Some(OsStr::new("h")) == extension || Some(OsStr::new("rs")) == extension {
+				let p = path.to_owned();
+				let tx = tx.clone();
+
+				pool.execute(move || {
+					let filedata = get_comments(p);
+					tx.send(filedata).expect("Could not send data!");
+				});
+
 			}
 		}
 	}
+
+	drop(tx);
+	
+	let mut datas = Vec::<FileData>::new();
+	for t in rx.iter() {
+		let filedata = t;
+		datas.push(filedata);	
+	}
+
+	write_to_db(datas,dbpath);
+
 }
+
+fn write_to_db(datas: Vec<FileData>,dbpath: String){
+	let mut connection = rusqlite::Connection::open(&dbpath).unwrap();
+	let transaction = connection.transaction().unwrap();
+	for data in datas{
+		add_filedata_sql(&data,&transaction);
+	}
+	log::info!("Commiting to Database");
+	transaction.commit().unwrap();
+	connection.close().unwrap();
+}
+
+
 
 /*
 	Extracts Comments from a given file
@@ -96,28 +146,28 @@ fn search_source(path: String, connection: Connection){
 		- Comments: Vector of Comments
 		- path: String containing the relative path to the file
 		- hash: Sha3-512 hash of the file
-		- uuid: Uuid V4 for the file
 	A Comment struct contains:
-		- fileid: Uuid V4 for the file (same as uuid found in FileData)
-		- uuid: Uuid V4 for the comment
+		- filehash: Sha3-512 hash of the file
+		- hash: Sha3-512 hash of the comment
 		- comment: String containing the extracted comment
 */
-fn get_comments(path: &Path) -> FileData {
+fn get_comments(path: PathBuf) -> FileData {
 	log::info!("Extracting comments from: {}", path.display());
 
-	let comment_parser_rules = comment_parser::get_syntax_from_path(path).unwrap();
-	let filecontents = read_file(&path);
-	let parser = CommentParser::new(&filecontents.contents, comment_parser_rules);
-	let filehash = &filecontents.hash;
+	let comment_parser_rules = comment_parser::get_syntax_from_path(&path).unwrap();
+	let (filecontents,filehash) = read_file(&path).unwrap();
+	let parser = CommentParser::new(&filecontents, comment_parser_rules);
 	let filepath = path.display().to_string();
 	let mut comments = Vec::<Comment>::new();
-	let fileid = Uuid::new_v4();
 	for comment in parser {
 		if comment.text().to_string().len() >= 5 {
+			let mut hasher = Sha3_512::new();
+			hasher.update(comment.text().to_string());
+			let commenthash = hasher.finalize();
 			let commentdata = Comment {
 				comment: comment.text().to_string().to_owned(),
-				uuid:	 Uuid::new_v4(),
-				fileid: fileid,
+				hash:	 format!("{:x}", commenthash).to_owned(),
+				filehash: filehash.to_owned(),
 			};
 			comments.push(commentdata);
 		}	
@@ -127,45 +177,34 @@ fn get_comments(path: &Path) -> FileData {
 			comments: comments,
 			path: filepath.to_owned(),
 			hash: filehash.to_owned(),
-			uuid: fileid,
 	};
 	
 	log::info!("Extracted comments from: {}", &filedata.path);
 	return filedata;
 }
 
-struct FileContents {
-	contents: String, // String containing contents
-	hash: String, // Hash of the file
+/*
+	Adds a given filedata struct to the sqlite 3 database
+*/
+fn add_filedata_sql(filedata: &FileData, transaction: &Transaction) {
+	log::info!("Adding {}'s results to results database", filedata.path);
+	for comment in filedata.comments.as_slice() {
+		transaction.execute_named("INSERT INTO comments (id, comment, filehash) VALUES (:hash, :comment, :filehash)", &to_params_named(&comment).unwrap().to_slice()).unwrap();
+	}
+	transaction.execute("INSERT INTO files (id, filename) VALUES (?1, ?2)", params![filedata.hash, filedata.path],).unwrap();
 }
 
 /*
-	Reads a file and returns a FileContents struct containing:
-		- contents: String containing all file contents but replacing non UTF8 chars
-		- hash: Hash of the file
+Creates Tables:
+	comments containing:
+		id: hash of the comment
+		comment: the comment
+		filehash: hash of the file where comment came from
+	files contiaining:
+		id: hash of the file
+		filename: path of the file
 */
-fn read_file(path: &Path) -> FileContents {
-	let buf = fs::read(path).unwrap();
-	let contents = String::from_utf8_lossy(&buf).into_owned().to_string();
-	let mut hasher = Sha3_512::new();
-	hasher.update(&buf);
-	let hash = hasher.finalize();
-	let filecontents = FileContents {
-		contents: contents.to_owned(),
-		hash: format!("{:x}", hash).to_owned(),
-	};
-	return filecontents
-}
-
-
-fn add_filedata_sql(filedata: &FileData, connection: &Connection) {
-	for comment in filedata.comments.as_slice() {
-		connection.execute_named("INSERT INTO comments (id, comment, fileid) VALUES (:uuid, :comment, :fileid)", &to_params_named(&comment).unwrap().to_slice()).unwrap();
-	}
-	connection.execute("INSERT INTO files (id, filename, filehash) VALUES (?1, ?2, ?3)", params![filedata.uuid.to_string(), filedata.path, filedata.hash],).unwrap();
-}
-
 fn create_table(connection: &Connection) {
-	connection.execute("CREATE TABLE comments (id TEXT, comment TEXT, fileid TEXT)", NO_PARAMS).unwrap();
-	connection.execute("CREATE TABLE files (id TEXT, filename TEXT, filehash TEXT)", NO_PARAMS).unwrap();
+	connection.execute("CREATE TABLE comments (id TEXT, comment TEXT, filehash TEXT)", NO_PARAMS).unwrap();
+	connection.execute("CREATE TABLE files (id TEXT, filename TEXT)", NO_PARAMS).unwrap();
 }
