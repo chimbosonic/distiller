@@ -1,7 +1,7 @@
 [package]
 name = "distiller"
 description = "distiller is a command line tool written in rust, used for extracting comment from source code and storing the results into a queryable sqlite database."
-version = "2.0.0"
+version = "2.0.1"
 authors = ["Alexis Lowe <alexis.lowe@protonmail.com>"]
 edition = "2018"
 repository = "https://gitlab.com/chimbosonic/distiller/"
@@ -10,19 +10,18 @@ readme = "README.MD"
 keywords = ["comment", "sqlite"]
 categories = ["command-line-utilities"]
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 comment-parser = "0.1.0"
 walkdir = "2.3.1"
 serde_rusqlite = "0.26.0"
-serde = { version = "1.0.116", features = ["derive"] }
+serde = { version = "1.0.119", features = ["derive"] }
 sha3 = "0.9.1"
-rusqlite = { version = "0.24.0", features = ["bundled"] }
-log = "0.4.11"
-env_logger = "0.7.1"
+rusqlite = { version = "0.24.2", features = ["bundled"] }
+log = "0.4.13"
+env_logger = "0.8.2"
 clap = "2.33.3"
-futures = "0.3.5"
+futures = "0.3.12"
 num_cpus = "1.13.0"
 threadpool = "1.8.1"
 
