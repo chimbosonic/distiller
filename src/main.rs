@@ -38,7 +38,7 @@ struct FileData {
 
 fn main() {
 	let matches = App::new("distiller")
-		.version("2.0.1")
+		.version("2.0.2")
 		.about("Extracts all comments in source code to sqlite db")
 		.arg(Arg::with_name("output")
 			.short("o")

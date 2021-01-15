@@ -1,7 +1,7 @@
 [package]
 name = "distiller"
 description = "distiller is a command line tool written in rust, used for extracting comment from source code and storing the results into a queryable sqlite database."
-version = "2.0.1"
+version = "2.0.2"
 authors = ["Alexis Lowe <alexis.lowe@protonmail.com>"]
 edition = "2018"
 repository = "https://gitlab.com/chimbosonic/distiller/"
