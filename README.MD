@@ -4,12 +4,12 @@
 `distiller` is a command line tool written in rust, used for extracting comment from source code and storing the results into a queryable sqlite database.
 
 ## Installation
-
 `distiller` is written in [Rust](https://www.rust-lang.org/). You can clone the repo and run to compile and install the binary to `${HOME}/.cargo/bin/distiller`
 
 ```bash
-cargo install --path . --profile release -Z unstable-options   
+cargo install --path .   
 ```
+
 ### cargo install
 You can also run 
 
@@ -22,7 +22,7 @@ This will install it from [crates.io](https://crates.io) to `${HOME}/.cargo/bin/
 
 ```bash
 distiller --help
-distiller 1.0
+distiller 2.0.1
 Extracts all comments in source code to sqlite db
 
 USAGE:
