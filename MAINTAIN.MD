@@ -69,6 +69,11 @@ Once all this is done commit and create a git tag with :
 git tag v<NUMBER>
 ```
 
+Push code and tag to gitlab.com:
+```bash
+git push
+```
+
 Finally publish to crate.io with :
 ```
 cargo publish
