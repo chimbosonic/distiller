@@ -43,7 +43,7 @@ Update version number in `README.md`:
 
 bash
 distiller --help
-distiller 2.0.2
+distiller 2.0.3
 Extracts all comments in source code to sqlite db
 ....
 ```
@@ -51,12 +51,12 @@ Extracts all comments in source code to sqlite db
 Update version number found when running `--help` in `main.rs` :
 ```rust
 let matches = App::new("distiller")
-    .version("2.0.2")
+    .version("2.0.3")
 ```
 
 Also update `Cargo.toml`:
 ```toml
-version = "2.0.2"
+version = "2.0.3"
 ```
 
 Update `Cargo.lock`:
@@ -69,12 +69,9 @@ Once all this is done commit and create a git tag with :
 git tag v<NUMBER>
 ```
 
-Push code and tag to gitlab.com:
+Push code to github.com:
 ```bash
 git push
 ```
 
-Finally publish to crate.io with :
-```
-cargo publish
-```
+Create a release on Github which will trigger the publish action
