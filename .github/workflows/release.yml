@@ -38,6 +38,7 @@ jobs:
           args: check
 
   release:
+    needs: [build, deny-check] 
     runs-on: ubuntu-latest
     steps:
 
