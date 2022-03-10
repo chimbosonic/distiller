@@ -9,7 +9,7 @@ extern crate sha3;
 extern crate threadpool;
 extern crate walkdir;
 
-use clap::{Command, Arg};
+use clap::{Arg, Command};
 use comment_parser::CommentParser;
 use rusqlite::{params, Connection, Transaction};
 use serde::{Deserialize, Serialize};
