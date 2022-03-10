@@ -11,6 +11,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout sources
+        uses: actions/checkout@v2
       - uses: ./.github/workflows/build.yml
 
   deny-check: # This is long and we only care when publishing
