@@ -12,14 +12,17 @@ jobs:
     uses: ./.github/workflows/build.yml
 
   release:
-    needs: [build, deny-check] 
+    needs: [build] 
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+    
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
 
-    - name: Checkout sources
-      uses: actions/checkout@v2
-
-    - name: publish
-      env:
-        crates_token: ${{ secrets.crates_token }}
-      run: cargo publish --locked --token ${crates_token}  --verbose
+      - name: publish
+        env:
+          crates_token: ${{ secrets.crates_token }}
+        run: cargo publish --locked --token ${crates_token} --verbose
