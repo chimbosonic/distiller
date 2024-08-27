@@ -23,7 +23,7 @@ This will install it from [crates.io](https://crates.io) to `${HOME}/.cargo/bin/
 
 ```bash
 distiller --help
-distiller 2.0.3
+distiller 2.0.4
 Extracts all comments in source code to sqlite db
 
 USAGE:

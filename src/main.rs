@@ -38,7 +38,7 @@ struct FileData {
 
 fn main() {
     let matches = Command::new("distiller")
-        .version("2.0.3")
+        .version("2.0.4")
         .about("Extracts all comments in source code to sqlite db")
         .arg(
             Arg::new("output")
@@ -46,7 +46,7 @@ fn main() {
                 .long("output")
                 .value_name("FILE")
                 .help("Sets the output db file defaults to results.db")
-                .takes_value(true),
+                .value_parser(clap::value_parser!(String)),
         )
         .arg(
             Arg::new("INPUT")
@@ -55,11 +55,12 @@ fn main() {
                 .help("Sets the source directory to parse")
                 .value_name("DIRECTORY")
                 .required(true)
-                .takes_value(true),
+                .value_parser(clap::value_parser!(String)),
         )
         .get_matches();
-    let dbpath = matches.value_of("output").unwrap_or("results.db");
-    let scandir = matches.value_of("INPUT").unwrap();
+    let binding = "results.db".to_string();
+    let dbpath = matches.get_one::<String>("output").unwrap_or(&binding);
+    let scandir = matches.get_one::<String>("INPUT").unwrap();
 
     env_logger::init(); //Setup logging Make sure to use RUST_LOG=info
     fs::remove_file(&dbpath).ok(); //Remove any existing results database

@@ -5,12 +5,6 @@ cargo upgrade && cargo update
 ```
 
 # Testing and Linting
-## License checks and Security Advisory checks
-Use [cargo-deny](https://github.com/EmbarkStudios/cargo-deny):
-```bash
-cargo deny check
-```
-
 ## Test the code
 Create a DB of the test_files
 ```bash
