@@ -49,7 +49,7 @@ jobs:
       - name: Download Artifacts
         uses: actions/download-artifact@v4
         with:
-          pattern: kneeboard-*
+          pattern: distiller-*
           merge-multiple: true
           path:  ${{ github.workspace }}/builds/
 
