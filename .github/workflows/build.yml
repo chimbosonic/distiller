@@ -4,9 +4,6 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
-  workflow_call:
-
-
 env:
   CARGO_TERM_COLOR: always
 
@@ -15,26 +12,36 @@ jobs:
     name: Check
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout sources
-        uses: actions/checkout@v4
-      
+      - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: stable
-
-      - name: Run cargo check
-        run: cargo check
-
+      - run: cargo check
   fmt:
-    name: rustfmt
+    name: Rustfmt
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout sources
-        uses: actions/checkout@v4
-
+      - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: stable
-      
-      - name: Run cargo fmt
-        run: cargo fmt --all -- --check
+          components: rustfmt
+      - run: cargo fmt --all -- --check
+  build-linux-targets:
+    name: Build targets
+    uses: ./.github/workflows/_build_linux_target.yml
+    strategy:
+      matrix:
+        target: [x86_64-unknown-linux-gnu, aarch64-unknown-linux-gnu, aarch64-unknown-linux-musl, x86_64-unknown-linux-musl]
+    with:
+      target: ${{ matrix.target }}
+      channel: stable
+  build-macos-targets:
+    name: Build targets
+    uses: ./.github/workflows/_build_macos_target.yml
+    strategy:
+      matrix:
+        target: [x86_64-apple-darwin, aarch64-apple-darwin]
+    with:
+      target: ${{ matrix.target }}
+      channel: stable
