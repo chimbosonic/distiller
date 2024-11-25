@@ -31,26 +31,9 @@ Exit sqlite3:
 .exit
 ```
 # Version Bump
-Update version number in `README.md`:
-```markdown
-## Usage
-
-bash
-distiller --help
-distiller 2.0.3
-Extracts all comments in source code to sqlite db
-....
-```
-
-Update version number found when running `--help` in `main.rs` :
-```rust
-let matches = App::new("distiller")
-    .version("2.0.3")
-```
-
-Also update `Cargo.toml`:
+Update `Cargo.toml`:
 ```toml
-version = "2.0.3"
+version = "3.0.0"
 ```
 
 Update `Cargo.lock`:

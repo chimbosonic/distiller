@@ -23,19 +23,15 @@ This will install it from [crates.io](https://crates.io) to `${HOME}/.cargo/bin/
 
 ```bash
 distiller --help
-distiller 2.0.4
-Extracts all comments in source code to sqlite db
+distiller is a command line tool written in rust, used for extracting comment from source code and storing the results into a queryable sqlite database.
 
-USAGE:
-    distiller [OPTIONS] --input <DIRECTORY>
+Usage: distiller [OPTIONS] --input <INPUT>
 
-FLAGS:
-    -h, --help       Prints help information
-    -V, --version    Prints version information
-
-OPTIONS:
-    -i, --input <DIRECTORY>    Sets the source directory to parse
-    -o, --output <FILE>        Sets the output db file defaults to results.db
+Options:
+  -o, --output <OUTPUT>  Sets the output db file defaults to results.db
+  -i, --input <INPUT>    Sets the source directory to parse
+  -h, --help             Print help
+  -V, --version          Print version
 ```
 
 ## Contributing
