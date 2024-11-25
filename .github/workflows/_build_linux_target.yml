@@ -28,6 +28,9 @@ jobs:
         with:
           toolchain: stable
           targets: ${{inputs.target}}
+
+      - name: Install sqlite3
+        run: sudo apt-get install sqlite3 libsqlite3-dev
       
       - run: cargo install cross --git https://github.com/cross-rs/cross
 

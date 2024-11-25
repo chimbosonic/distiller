@@ -27,6 +27,7 @@ jobs:
           toolchain: stable
           components: rustfmt
       - run: cargo fmt --all -- --check
+
   build-linux-targets:
     name: Build targets
     uses: ./.github/workflows/_build_linux_target.yml
@@ -36,6 +37,7 @@ jobs:
     with:
       target: ${{ matrix.target }}
       channel: stable
+
   build-macos-targets:
     name: Build targets
     uses: ./.github/workflows/_build_macos_target.yml
